@@ -74,3 +74,19 @@ h1 {
   color: #555;
   font-size: 1em;
 }
+
+.show-more-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.show-more-btn:hover {
+  background-color: #444;
+}
+
