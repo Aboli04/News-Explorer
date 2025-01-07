@@ -355,80 +355,109 @@ document.addEventListener("DOMContentLoaded", () => {
   const newsGrid = document.getElementById("news-grid");
   const filterButtons = document.querySelectorAll(".filter-btn");
   const showMoreBtn = document.getElementById("show-more-btn");
+  const searchBar = document.getElementById("search-bar");
 
-  let currentNewsIndex = 7; // Tracks the current number of displayed news
+  let searchTerm = "";
 
-  // Parse date strings for sorting
-  const sortedData = data
-    .sort(
-      (a, b) =>
-        new Date(
-          a.dateAndTime.split(", ")[0].split("/").reverse().join("-") +
-            "T" +
-            a.dateAndTime.split(", ")[1]
-        ) -
-        new Date(
-          b.dateAndTime.split(", ")[0].split("/").reverse().join("-") +
-            "T" +
-            b.dateAndTime.split(", ")[1]
-        )
-    )
-    .reverse();
+  // Sort data by date and time (latest first)
+  const sortedData = data.sort(
+    (a, b) =>
+      new Date(
+        b.dateAndTime.split(", ")[0].split("/").reverse().join("-") +
+          "T" +
+          b.dateAndTime.split(", ")[1]
+      ) -
+      new Date(
+        a.dateAndTime.split(", ")[0].split("/").reverse().join("-") +
+          "T" +
+          a.dateAndTime.split(", ")[1]
+      )
+  );
 
-  // Display first 7 sorted news initially
-  renderNewsCards(sortedData.slice(0, 7));
+  renderNewsCards(sortedData.slice(0, 7)); // Initial render: 7 articles
 
-  // Filter functionality
   filterButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const category = button.dataset.category;
 
-      // Toggle active state
+      // Highlight active filter
       filterButtons.forEach((btn) => btn.classList.remove("active"));
       button.classList.add("active");
 
-      // Filter news by category
+      // Filter articles by category
       const filteredNews = category
         ? sortedData.filter((item) => item.category === category)
         : sortedData;
 
-      currentNewsIndex = 7; // Reset to show the first 7 after filtering
-      renderNewsCards(filteredNews.slice(0, 7));
-
-      // Show the "Show More" button again if there are more news items
-      showMoreBtn.style.display = filteredNews.length > 7 ? "block" : "none";
+      renderNewsCards(filteredNews.slice(0, 7)); // Render top 7 filtered articles
+      toggleShowMoreButton(filteredNews.length);
     });
   });
 
-  // Show more functionality
   showMoreBtn.addEventListener("click", () => {
-    // Show the next 7 news items
-    const nextNews = sortedData.slice(currentNewsIndex, currentNewsIndex + 7);
-    renderNewsCards(nextNews);
+    // If there is an active filter, respect it
+    const activeCategory =
+      document.querySelector(".filter-btn.active").dataset.category;
 
-    // Update the current news index to reflect the number of displayed items
-    currentNewsIndex += 7;
+    const filteredNews = activeCategory
+      ? sortedData.filter((item) => item.category === activeCategory)
+      : sortedData;
 
-    // Hide the "Show More" button if all items have been displayed
-    if (currentNewsIndex >= sortedData.length) {
-      showMoreBtn.style.display = "none";
-    }
+    // Render all remaining articles
+    renderNewsCards(filteredNews);
+    showMoreBtn.style.display = "none"; // Hide button after showing all
   });
 
-  // Function to render news cards dynamically
+  const debounce = (func, delay) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), delay);
+    };
+  };
+
+  searchBar.addEventListener(
+    "input",
+    debounce((e) => {
+      searchTerm = e.target.value.toLowerCase();
+      const searchedNews = sortedData.filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchTerm) ||
+          item.content.toLowerCase().includes(searchTerm)
+      );
+
+      renderNewsCards(searchedNews.slice(0, 7)); // Render top 7 searched articles
+      toggleShowMoreButton(searchedNews.length);
+    }, 300)
+  );
+
   function renderNewsCards(newsItems) {
+    newsGrid.innerHTML = "";
     newsItems.forEach((item) => {
+      const highlightedTitle = highlightText(item.title, searchTerm);
+      const highlightedContent = highlightText(item.content, searchTerm);
+
       const card = document.createElement("div");
       card.classList.add("card");
 
       card.innerHTML = `
         <div class="card-content">
-          <h3 class="card-title">${item.title}</h3>
+          <h3 class="card-title">${highlightedTitle}</h3>
           <p class="card-date">${item.dateAndTime}</p>
-          <p class="card-description">${item.content}</p>
+          <p class="card-description">${highlightedContent}</p>
         </div>
       `;
       newsGrid.appendChild(card);
     });
+  }
+
+  function highlightText(text, term) {
+    if (!term) return text;
+    const regex = new RegExp(`(${term})`, "gi");
+    return text.replace(regex, `<span class="highlight">$1</span>`);
+  }
+
+  function toggleShowMoreButton(totalItems) {
+    showMoreBtn.style.display = totalItems > 7 ? "block" : "none";
   }
 });
