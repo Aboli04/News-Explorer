@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>News Explorer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Top stories for you</h1>
+
+      <div class="filters">
+        <button class="filter-btn active">All</button>
+        <button class="filter-btn" data-category="business">Business</button>
+        <button class="filter-btn" data-category="politics">Politics</button>
+        <button class="filter-btn" data-category="sport">Sports</button>
+        <button class="filter-btn" data-category="entertainment">
+          Entertainment
+        </button>
+      </div>
+
+      <div class="news-grid" id="news-grid">
+        <!-- News cards will be injected here by JavaScript -->
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
