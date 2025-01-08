@@ -12,6 +12,8 @@ The News Explorer project is a web application that displays a curated list of n
 - Debounced Search: Implements a search feature with a delay to improve performance, highlighting search terms in the results for easy identification.
 
 - Sorted Articles: Ensures news articles are sorted by date, with the latest appearing first, keeping the content relevant and up-to-date.
+# View Project Click below
+[News Explorer](https://aboli04.github.io/News-Explorer/)
 
 # Screenshots
 
