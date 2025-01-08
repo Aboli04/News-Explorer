@@ -358,8 +358,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBar = document.getElementById("search-bar");
 
   let searchTerm = "";
+  let selectedCategories = new Set(["All"]);
 
-  // Sort data by date and time (latest first)
   const sortedData = data.sort(
     (a, b) =>
       new Date(
@@ -374,38 +374,38 @@ document.addEventListener("DOMContentLoaded", () => {
       )
   );
 
-  renderNewsCards(sortedData.slice(0, 7)); // Initial render: 7 articles
+  let filteredNews = sortedData;
+  renderNewsCards(filteredNews.slice(0, 7));
 
   filterButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const category = button.dataset.category;
 
-      // Highlight active filter
-      filterButtons.forEach((btn) => btn.classList.remove("active"));
-      button.classList.add("active");
+      if (category === "All") {
+        selectedCategories.clear();
+        selectedCategories.add("All");
+        updateFilterButtonStyles();
+      } else {
+        selectedCategories.delete("All");
 
-      // Filter articles by category
-      const filteredNews = category
-        ? sortedData.filter((item) => item.category === category)
-        : sortedData;
+        if (selectedCategories.has(category)) {
+          selectedCategories.delete(category);
+        } else {
+          selectedCategories.add(category);
+        }
 
-      renderNewsCards(filteredNews.slice(0, 7)); // Render top 7 filtered articles
+        updateFilterButtonStyles();
+      }
+
+      filteredNews = filterNewsByCategories(sortedData);
+      renderNewsCards(filteredNews.slice(0, 7));
       toggleShowMoreButton(filteredNews.length);
     });
   });
 
   showMoreBtn.addEventListener("click", () => {
-    // If there is an active filter, respect it
-    const activeCategory =
-      document.querySelector(".filter-btn.active").dataset.category;
-
-    const filteredNews = activeCategory
-      ? sortedData.filter((item) => item.category === activeCategory)
-      : sortedData;
-
-    // Render all remaining articles
     renderNewsCards(filteredNews);
-    showMoreBtn.style.display = "none"; // Hide button after showing all
+    showMoreBtn.style.display = "none";
   });
 
   const debounce = (func, delay) => {
@@ -420,14 +420,14 @@ document.addEventListener("DOMContentLoaded", () => {
     "input",
     debounce((e) => {
       searchTerm = e.target.value.toLowerCase();
-      const searchedNews = sortedData.filter(
+      filteredNews = sortedData.filter(
         (item) =>
           item.title.toLowerCase().includes(searchTerm) ||
           item.content.toLowerCase().includes(searchTerm)
       );
 
-      renderNewsCards(searchedNews.slice(0, 7)); // Render top 7 searched articles
-      toggleShowMoreButton(searchedNews.length);
+      renderNewsCards(filteredNews.slice(0, 7));
+      toggleShowMoreButton(filteredNews.length);
     }, 300)
   );
 
@@ -459,5 +459,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function toggleShowMoreButton(totalItems) {
     showMoreBtn.style.display = totalItems > 7 ? "block" : "none";
+  }
+
+  function filterNewsByCategories(newsItems) {
+    if (selectedCategories.has("All")) {
+      return newsItems;
+    }
+
+    return newsItems.filter((item) => selectedCategories.has(item.category));
+  }
+
+  function updateFilterButtonStyles() {
+    filterButtons.forEach((btn) => {
+      if (
+        selectedCategories.has(btn.dataset.category) ||
+        (selectedCategories.has("All") && btn.dataset.category === "All")
+      ) {
+        btn.classList.add("active");
+        btn.style.backgroundColor = "black";
+        btn.style.color = "white";
+      } else {
+        btn.classList.remove("active");
+        btn.style.backgroundColor = "";
+        btn.style.color = "";
+      }
+    });
   }
 });

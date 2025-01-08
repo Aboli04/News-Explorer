@@ -11,7 +11,7 @@
       <h1>Top Stories for You</h1>
 
       <div class="filters">
-        <button class="filter-btn active">All</button>
+        <button class="filter-btn active" data-category="All">All</button>
         <button class="filter-btn" data-category="business">Business</button>
         <button class="filter-btn" data-category="politics">Politics</button>
         <button class="filter-btn" data-category="sport">Sports</button>
@@ -27,9 +27,7 @@
         placeholder="Search news..."
       />
 
-      <div class="news-grid" id="news-grid">
-        <!-- News cards will be dynamically injected here -->
-      </div>
+      <div class="news-grid" id="news-grid"> </div>
 
       <button id="show-more-btn" class="show-more-btn">Show More</button>
     </div>
